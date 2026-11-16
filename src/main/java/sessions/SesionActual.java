@@ -51,6 +51,14 @@ public final class SesionActual {
         sesion.setAttribute(ROL_ACTIVO, rol);
     }
 
+    public static void salirDelNegocio(HttpServletRequest request) {
+        HttpSession sesion = request.getSession(false);
+        if (sesion != null) {
+            sesion.removeAttribute(NEGOCIO_ACTIVO);
+            sesion.removeAttribute(ROL_ACTIVO);
+        }
+    }
+
     public static void cerrar(HttpServletRequest request) {
         HttpSession sesion = request.getSession(false);
         if (sesion != null) {

@@ -130,17 +130,12 @@ public class Manejador extends HttpServlet {
                         usuario.setEmail(parametroTexto(request, "email").toLowerCase());
                         usuario.setPasswordHash(Hash.sha256(request.getParameter("password")));
                         usuario.setNombre(parametroTexto(request, "nombre"));
-                        usuarioF.create(usuario);
 
                         Negocio negocio = new Negocio();
                         negocio.setNombre(parametroTexto(request, "nombreNegocio"));
                         negocio.setFechaCreacion(new Date());
-                        negocioF.create(negocio);
 
-                        Membresia membresia = new Membresia(
-                                new MembresiaPK(usuario.getIdusuario(), negocio.getIdnegocio()));
-                        membresia.setRol(MembresiaFacade.PROPIETARIO);
-                        membresiaF.create(membresia);
+                        usuarioF.registrar(usuario, negocio);
 
                         SesionActual.iniciar(request, usuario);
                         SesionActual.elegirNegocio(request, negocio, MembresiaFacade.PROPIETARIO);
@@ -186,11 +181,7 @@ public class Manejador extends HttpServlet {
                     Negocio negocio = new Negocio();
                     negocio.setNombre(nombre);
                     negocio.setFechaCreacion(new Date());
-                    negocioF.create(negocio);
-                    Membresia membresia = new Membresia(
-                            new MembresiaPK(usuario.getIdusuario(), negocio.getIdnegocio()));
-                    membresia.setRol(MembresiaFacade.PROPIETARIO);
-                    membresiaF.create(membresia);
+                    negocioF.crearConPropietario(negocio, usuario.getIdusuario());
                     SesionActual.elegirNegocio(request, negocio, MembresiaFacade.PROPIETARIO);
                 }
                 response.sendRedirect(request.getContextPath() + "/Panel");

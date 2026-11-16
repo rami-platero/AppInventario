@@ -1,7 +1,9 @@
 package controller;
 
+import entities.Membresia;
 import entities.Negocio;
 import entities.Usuario;
+import jakarta.ejb.EJB;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebFilter;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import sessions.MembresiaFacade;
 import sessions.SesionActual;
 
 @WebFilter(urlPatterns = "/*")
@@ -29,6 +32,9 @@ public class SesionNegocioFiltro extends HttpFilter {
             "/AgregarCategoria", "/EditarCategoria", "/EliminarCategoria",
             "/AgregarProveedor", "/EditarProveedor", "/EliminarProveedor",
             "/Empleados", "/AgregarEmpleado", "/CambiarRolEmpleado", "/EliminarEmpleado");
+
+    @EJB
+    private MembresiaFacade membresiaF;
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response,
@@ -58,14 +64,29 @@ public class SesionNegocioFiltro extends HttpFilter {
             return;
         }
 
-        if (SOLO_PROPIETARIO.contains(path) && !SesionActual.esPropietario(request)) {
+        Membresia membresia = membresiaF.findRol(usuario.getIdusuario(), negocio.getIdnegocio());
+        if (membresia == null) {
+            SesionActual.salirDelNegocio(request);
+            response.sendRedirect(request.getContextPath() + "/Negocios?error="
+                    + codificar("Ya no pertenecés a " + negocio.getNombre() + "."));
+            return;
+        }
+        if (!membresia.getRol().equals(SesionActual.rolActivo(request))) {
+            SesionActual.elegirNegocio(request, negocio, membresia.getRol());
+        }
+
+        if (SOLO_PROPIETARIO.contains(path)
+                && !MembresiaFacade.PROPIETARIO.equals(membresia.getRol())) {
             response.sendRedirect(request.getContextPath() + "/Panel?error="
-                    + URLEncoder.encode("Esa acción es sólo para el propietario del negocio.",
-                            StandardCharsets.UTF_8));
+                    + codificar("Esa acción es sólo para el propietario del negocio."));
             return;
         }
 
         chain.doFilter(request, response);
+    }
+
+    private String codificar(String texto) {
+        return URLEncoder.encode(texto, StandardCharsets.UTF_8);
     }
 
 }
