@@ -1,0 +1,31 @@
+# Maven
+target/
+
+# NetBeans
+nbproject/private/
+nbactions.xml
+nbactions-*.xml
+build/
+dist/
+
+# Otros IDE
+.idea/
+*.iml
+.settings/
+.classpath
+.project
+.vscode/
+
+# Compilados y empaquetados
+*.class
+*.war
+*.ear
+*.jar
+
+# Logs
+*.log
+
+# Sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
