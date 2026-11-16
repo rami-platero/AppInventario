@@ -39,6 +39,15 @@ public class LoteFacade extends AbstractFacade<Lote> {
         super(Lote.class);
     }
 
+    public Lote findEnNegocio(Integer id, Integer idNegocio) {
+        Lote lote = find(id);
+        if (lote == null
+                || !lote.getProductoIdproducto().getNegocioIdnegocio().getIdnegocio().equals(idNegocio)) {
+            return null;
+        }
+        return lote;
+    }
+
     public List<Lote> findByProducto(Integer idProducto) {
         return getEntityManager().createQuery(
                 "SELECT l FROM Lote l WHERE l.productoIdproducto.idproducto = :id AND l.cantidad > 0 "
@@ -46,48 +55,59 @@ public class LoteFacade extends AbstractFacade<Lote> {
                 .setParameter("id", idProducto).getResultList();
     }
 
-    public List<Lote> findConStock() {
+    public List<Lote> findConStock(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT l FROM Lote l WHERE l.cantidad > 0 "
-                + "ORDER BY l.productoIdproducto.nombre, l.vencimiento", Lote.class).getResultList();
+                "SELECT l FROM Lote l WHERE l.productoIdproducto.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND l.cantidad > 0 ORDER BY l.productoIdproducto.nombre, l.vencimiento", Lote.class)
+                .setParameter("idNegocio", idNegocio).getResultList();
     }
 
-    public List<Lote> findPorVencer(int dias) {
+    public List<Lote> findPorVencer(int dias, Integer idNegocio) {
         Calendar limite = Calendar.getInstance();
         limite.add(Calendar.DAY_OF_MONTH, dias);
         return getEntityManager().createQuery(
-                "SELECT l FROM Lote l WHERE l.cantidad > 0 AND l.vencimiento <= :limite "
-                + "ORDER BY l.vencimiento", Lote.class)
+                "SELECT l FROM Lote l WHERE l.productoIdproducto.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND l.cantidad > 0 AND l.vencimiento <= :limite ORDER BY l.vencimiento", Lote.class)
+                .setParameter("idNegocio", idNegocio)
                 .setParameter("limite", limite.getTime(), TemporalType.DATE).getResultList();
     }
 
-    public long countPorVencer(int dias) {
+    public long countPorVencer(int dias, Integer idNegocio) {
         Calendar limite = Calendar.getInstance();
         limite.add(Calendar.DAY_OF_MONTH, dias);
         return getEntityManager().createQuery(
-                "SELECT COUNT(l) FROM Lote l WHERE l.cantidad > 0 AND l.vencimiento <= :limite",
-                Long.class).setParameter("limite", limite.getTime(), TemporalType.DATE).getSingleResult();
+                "SELECT COUNT(l) FROM Lote l "
+                + "WHERE l.productoIdproducto.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND l.cantidad > 0 AND l.vencimiento <= :limite", Long.class)
+                .setParameter("idNegocio", idNegocio)
+                .setParameter("limite", limite.getTime(), TemporalType.DATE).getSingleResult();
     }
 
-    public long countVencidos() {
+    public long countVencidos(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT COUNT(l) FROM Lote l WHERE l.cantidad > 0 AND l.vencimiento < :hoy",
-                Long.class).setParameter("hoy", new Date(), TemporalType.DATE).getSingleResult();
+                "SELECT COUNT(l) FROM Lote l "
+                + "WHERE l.productoIdproducto.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND l.cantidad > 0 AND l.vencimiento < :hoy", Long.class)
+                .setParameter("idNegocio", idNegocio)
+                .setParameter("hoy", new Date(), TemporalType.DATE).getSingleResult();
     }
 
-    public long unidadesPorVencer(int dias) {
+    public long unidadesPorVencer(int dias, Integer idNegocio) {
         Calendar limite = Calendar.getInstance();
         limite.add(Calendar.DAY_OF_MONTH, dias);
         Long suma = getEntityManager().createQuery(
-                "SELECT SUM(l.cantidad) FROM Lote l WHERE l.cantidad > 0 AND l.vencimiento <= :limite",
-                Long.class).setParameter("limite", limite.getTime(), TemporalType.DATE).getSingleResult();
+                "SELECT SUM(l.cantidad) FROM Lote l "
+                + "WHERE l.productoIdproducto.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND l.cantidad > 0 AND l.vencimiento <= :limite", Long.class)
+                .setParameter("idNegocio", idNegocio)
+                .setParameter("limite", limite.getTime(), TemporalType.DATE).getSingleResult();
         return suma == null ? 0L : suma;
     }
 
-    public List<SugerenciaLote> analizarVencimientos(int dias) {
+    public List<SugerenciaLote> analizarVencimientos(int dias, Integer idNegocio) {
         List<SugerenciaLote> resultado = new ArrayList<>();
         Map<Integer, RitmoVenta> cache = new HashMap<>();
-        for (Lote lote : findPorVencer(dias)) {
+        for (Lote lote : findPorVencer(dias, idNegocio)) {
             Producto producto = lote.getProductoIdproducto();
             RitmoVenta ritmo = cache.get(producto.getIdproducto());
             if (ritmo == null) {

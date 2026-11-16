@@ -21,31 +21,45 @@ public class CategoriaFacade extends AbstractFacade<Categoria> {
         super(Categoria.class);
     }
 
-    public List<Categoria> findOrdenadas() {
-        return getEntityManager().createQuery(
-                "SELECT c FROM Categoria c ORDER BY c.nombre", Categoria.class).getResultList();
+    public Categoria findEnNegocio(Integer id, Integer idNegocio) {
+        Categoria categoria = find(id);
+        if (categoria == null || !categoria.getNegocioIdnegocio().getIdnegocio().equals(idNegocio)) {
+            return null;
+        }
+        return categoria;
     }
 
-    public List<Object[]> findConCantidadDeProductos() {
+    public List<Categoria> findOrdenadas(Integer idNegocio) {
+        return getEntityManager().createQuery(
+                "SELECT c FROM Categoria c WHERE c.negocioIdnegocio.idnegocio = :idNegocio "
+                + "ORDER BY c.nombre", Categoria.class)
+                .setParameter("idNegocio", idNegocio).getResultList();
+    }
+
+    public List<Object[]> findConCantidadDeProductos(Integer idNegocio) {
         return getEntityManager().createQuery(
                 "SELECT c, COUNT(p) FROM Categoria c LEFT JOIN c.productoCollection p "
+                + "WHERE c.negocioIdnegocio.idnegocio = :idNegocio "
                 + "GROUP BY c.idcategoria, c.nombre ORDER BY c.nombre",
-                Object[].class).getResultList();
+                Object[].class).setParameter("idNegocio", idNegocio).getResultList();
     }
 
-    public List<Object[]> countAlertasPorCategoria() {
+    public List<Object[]> countAlertasPorCategoria(Integer idNegocio) {
         return getEntityManager().createQuery(
                 "SELECT p.categoriaIdcategoria.idcategoria, COUNT(p) FROM Producto p "
-                + "WHERE p.stock <= p.stockMinimo GROUP BY p.categoriaIdcategoria.idcategoria",
-                Object[].class).getResultList();
+                + "WHERE p.negocioIdnegocio.idnegocio = :idNegocio AND p.stock <= p.stockMinimo "
+                + "GROUP BY p.categoriaIdcategoria.idcategoria",
+                Object[].class).setParameter("idNegocio", idNegocio).getResultList();
     }
 
-    public boolean existeNombre(String nombre, Integer idExcluir) {
+    public boolean existeNombre(String nombre, Integer idExcluir, Integer idNegocio) {
         Long repetidas = getEntityManager().createQuery(
                 "SELECT COUNT(c) FROM Categoria c WHERE LOWER(c.nombre) = :nombre "
-                + "AND (:id IS NULL OR c.idcategoria <> :id)", Long.class)
+                + "AND c.negocioIdnegocio.idnegocio = :idNegocio AND c.idcategoria <> :id",
+                Long.class)
                 .setParameter("nombre", nombre.trim().toLowerCase())
-                .setParameter("id", idExcluir).getSingleResult();
+                .setParameter("idNegocio", idNegocio)
+                .setParameter("id", idExcluir == null ? 0 : idExcluir).getSingleResult();
         return repetidas > 0;
     }
 

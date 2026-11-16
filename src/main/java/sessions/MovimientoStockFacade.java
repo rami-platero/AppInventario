@@ -75,6 +75,7 @@ public class MovimientoStockFacade extends AbstractFacade<MovimientoStock> {
 
         MovimientoStock movimiento = new MovimientoStock();
         movimiento.setProductoIdproducto(producto);
+        movimiento.setNegocioIdnegocio(producto.getNegocioIdnegocio());
         movimiento.setTipo(tipo);
         movimiento.setCantidad(cantidad);
         movimiento.setStockResultante(resultante);
@@ -204,14 +205,16 @@ public class MovimientoStockFacade extends AbstractFacade<MovimientoStock> {
         return suma == null ? 0 : suma.intValue();
     }
 
-    public List<MovimientoStock> findUltimos(int cantidad) {
+    public List<MovimientoStock> findUltimos(int cantidad, Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT m FROM MovimientoStock m ORDER BY m.fecha DESC, m.idmovimiento DESC",
-                MovimientoStock.class).setMaxResults(cantidad).getResultList();
+                "SELECT m FROM MovimientoStock m WHERE m.negocioIdnegocio.idnegocio = :idNegocio "
+                + "ORDER BY m.fecha DESC, m.idmovimiento DESC", MovimientoStock.class)
+                .setParameter("idNegocio", idNegocio).setMaxResults(cantidad).getResultList();
     }
 
-    public List<MovimientoStock> buscar(Integer idProducto, String tipo) {
-        StringBuilder jpql = new StringBuilder("SELECT m FROM MovimientoStock m WHERE 1 = 1");
+    public List<MovimientoStock> buscar(Integer idProducto, String tipo, Integer idNegocio) {
+        StringBuilder jpql = new StringBuilder(
+                "SELECT m FROM MovimientoStock m WHERE m.negocioIdnegocio.idnegocio = :idNegocio");
         if (idProducto != null) {
             jpql.append(" AND m.productoIdproducto.idproducto = :idProducto");
         }
@@ -220,7 +223,8 @@ public class MovimientoStockFacade extends AbstractFacade<MovimientoStock> {
         }
         jpql.append(" ORDER BY m.fecha DESC, m.idmovimiento DESC");
         TypedQuery<MovimientoStock> query =
-                getEntityManager().createQuery(jpql.toString(), MovimientoStock.class);
+                getEntityManager().createQuery(jpql.toString(), MovimientoStock.class)
+                .setParameter("idNegocio", idNegocio);
         if (idProducto != null) {
             query.setParameter("idProducto", idProducto);
         }
@@ -230,20 +234,22 @@ public class MovimientoStockFacade extends AbstractFacade<MovimientoStock> {
         return query.setMaxResults(200).getResultList();
     }
 
-    public List<Object[]> findMasVendidos(int cantidad) {
+    public List<Object[]> findMasVendidos(int cantidad, Integer idNegocio) {
         return getEntityManager().createQuery(
                 "SELECT m.productoIdproducto, SUM(m.cantidad) FROM MovimientoStock m "
-                + "WHERE m.tipo = :tipo GROUP BY m.productoIdproducto "
-                + "ORDER BY SUM(m.cantidad) DESC", Object[].class)
+                + "WHERE m.negocioIdnegocio.idnegocio = :idNegocio AND m.tipo = :tipo "
+                + "GROUP BY m.productoIdproducto ORDER BY SUM(m.cantidad) DESC", Object[].class)
+                .setParameter("idNegocio", idNegocio)
                 .setParameter("tipo", SALIDA).setMaxResults(cantidad).getResultList();
     }
 
-    public List<Object[]> findComprasPorProveedor() {
+    public List<Object[]> findComprasPorProveedor(Integer idNegocio) {
         return getEntityManager().createQuery(
                 "SELECT m.proveedorIdproveedor, COUNT(m), SUM(m.cantidad) FROM MovimientoStock m "
-                + "WHERE m.tipo = :tipo AND m.proveedorIdproveedor IS NOT NULL "
+                + "WHERE m.negocioIdnegocio.idnegocio = :idNegocio AND m.tipo = :tipo "
+                + "AND m.proveedorIdproveedor IS NOT NULL "
                 + "GROUP BY m.proveedorIdproveedor ORDER BY SUM(m.cantidad) DESC", Object[].class)
-                .setParameter("tipo", ENTRADA).getResultList();
+                .setParameter("idNegocio", idNegocio).setParameter("tipo", ENTRADA).getResultList();
     }
 
 }

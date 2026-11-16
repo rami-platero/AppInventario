@@ -23,19 +23,32 @@ public class ProductoFacade extends AbstractFacade<Producto> {
         super(Producto.class);
     }
 
-    public List<Producto> findOrdenados() {
-        return getEntityManager().createQuery(
-                "SELECT p FROM Producto p ORDER BY p.nombre", Producto.class).getResultList();
+    public Producto findEnNegocio(Integer id, Integer idNegocio) {
+        Producto producto = find(id);
+        if (producto == null || !producto.getNegocioIdnegocio().getIdnegocio().equals(idNegocio)) {
+            return null;
+        }
+        return producto;
     }
 
-    public List<Producto> findBajoMinimo() {
+    public List<Producto> findOrdenados(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT p FROM Producto p WHERE p.stock <= p.stockMinimo "
-                + "ORDER BY p.stock, p.nombre", Producto.class).getResultList();
+                "SELECT p FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio "
+                + "ORDER BY p.nombre", Producto.class)
+                .setParameter("idNegocio", idNegocio).getResultList();
     }
 
-    public List<Producto> buscar(String texto, Integer idCategoria, String estado, String orden) {
-        StringBuilder jpql = new StringBuilder("SELECT p FROM Producto p WHERE 1 = 1");
+    public List<Producto> findBajoMinimo(Integer idNegocio) {
+        return getEntityManager().createQuery(
+                "SELECT p FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND p.stock <= p.stockMinimo ORDER BY p.stock, p.nombre", Producto.class)
+                .setParameter("idNegocio", idNegocio).getResultList();
+    }
+
+    public List<Producto> buscar(String texto, Integer idCategoria, String estado, String orden,
+            Integer idNegocio) {
+        StringBuilder jpql = new StringBuilder(
+                "SELECT p FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio");
         if (texto != null && !texto.trim().isEmpty()) {
             jpql.append(" AND (LOWER(p.nombre) LIKE :texto OR LOWER(p.codigo) LIKE :texto)");
         }
@@ -58,7 +71,8 @@ public class ProductoFacade extends AbstractFacade<Producto> {
         } else {
             jpql.append(" ORDER BY p.nombre");
         }
-        TypedQuery<Producto> query = getEntityManager().createQuery(jpql.toString(), Producto.class);
+        TypedQuery<Producto> query = getEntityManager().createQuery(jpql.toString(), Producto.class)
+                .setParameter("idNegocio", idNegocio);
         if (texto != null && !texto.trim().isEmpty()) {
             query.setParameter("texto", "%" + texto.trim().toLowerCase() + "%");
         }
@@ -68,41 +82,50 @@ public class ProductoFacade extends AbstractFacade<Producto> {
         return query.getResultList();
     }
 
-    public long countBajoMinimo() {
+    public long countBajoMinimo(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT COUNT(p) FROM Producto p WHERE p.stock <= p.stockMinimo",
-                Long.class).getSingleResult();
+                "SELECT COUNT(p) FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND p.stock <= p.stockMinimo", Long.class)
+                .setParameter("idNegocio", idNegocio).getSingleResult();
     }
 
-    public long countAgotados() {
+    public long countAgotados(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT COUNT(p) FROM Producto p WHERE p.stock = 0", Long.class).getSingleResult();
+                "SELECT COUNT(p) FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND p.stock = 0", Long.class)
+                .setParameter("idNegocio", idNegocio).getSingleResult();
     }
 
-    public long totalUnidades() {
+    public long totalUnidades(Integer idNegocio) {
         Long total = getEntityManager().createQuery(
-                "SELECT SUM(p.stock) FROM Producto p", Long.class).getSingleResult();
+                "SELECT SUM(p.stock) FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio",
+                Long.class).setParameter("idNegocio", idNegocio).getSingleResult();
         return total == null ? 0L : total;
     }
 
-    public BigDecimal valorInventario() {
+    public BigDecimal valorInventario(Integer idNegocio) {
         BigDecimal valor = getEntityManager().createQuery(
-                "SELECT SUM(p.stock * p.precio) FROM Producto p", BigDecimal.class).getSingleResult();
+                "SELECT SUM(p.stock * p.precio) FROM Producto p "
+                + "WHERE p.negocioIdnegocio.idnegocio = :idNegocio", BigDecimal.class)
+                .setParameter("idNegocio", idNegocio).getSingleResult();
         return valor == null ? BigDecimal.ZERO : valor;
     }
 
-    public List<Producto> findSinProveedor() {
+    public List<Producto> findSinProveedor(Integer idNegocio) {
         return getEntityManager().createQuery(
-                "SELECT p FROM Producto p WHERE p.productoProveedorCollection IS EMPTY "
-                + "ORDER BY p.nombre", Producto.class).getResultList();
+                "SELECT p FROM Producto p WHERE p.negocioIdnegocio.idnegocio = :idNegocio "
+                + "AND p.productoProveedorCollection IS EMPTY ORDER BY p.nombre", Producto.class)
+                .setParameter("idNegocio", idNegocio).getResultList();
     }
 
-    public boolean existeCodigo(String codigo, Integer idExcluir) {
+    public boolean existeCodigo(String codigo, Integer idExcluir, Integer idNegocio) {
         Long repetidos = getEntityManager().createQuery(
                 "SELECT COUNT(p) FROM Producto p WHERE LOWER(p.codigo) = :codigo "
-                + "AND (:id IS NULL OR p.idproducto <> :id)", Long.class)
+                + "AND p.negocioIdnegocio.idnegocio = :idNegocio AND p.idproducto <> :id",
+                Long.class)
                 .setParameter("codigo", codigo.trim().toLowerCase())
-                .setParameter("id", idExcluir).getSingleResult();
+                .setParameter("idNegocio", idNegocio)
+                .setParameter("id", idExcluir == null ? 0 : idExcluir).getSingleResult();
         return repetidos > 0;
     }
 
