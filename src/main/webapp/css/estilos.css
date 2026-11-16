@@ -395,6 +395,11 @@ input:focus, select:focus, textarea:focus {
     outline-offset: 1px;
 }
 
+td select {
+    width: auto;
+    min-width: 160px;
+}
+
 input:disabled {
     color: var(--texto-suave);
     cursor: not-allowed;
