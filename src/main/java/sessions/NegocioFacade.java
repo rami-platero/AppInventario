@@ -1,5 +1,7 @@
 package sessions;
 
+import entities.Membresia;
+import entities.MembresiaPK;
 import entities.Negocio;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -18,6 +20,16 @@ public class NegocioFacade extends AbstractFacade<Negocio> {
 
     public NegocioFacade() {
         super(Negocio.class);
+    }
+
+    public Negocio crearConPropietario(Negocio negocio, Integer idUsuario) {
+        em.persist(negocio);
+        em.flush();
+        Membresia membresia = new Membresia(
+                new MembresiaPK(idUsuario, negocio.getIdnegocio()));
+        membresia.setRol(MembresiaFacade.PROPIETARIO);
+        em.persist(membresia);
+        return negocio;
     }
 
 }
