@@ -15,6 +15,19 @@
                     Depósito
                     <span>Inventario de stock</span>
                 </div>
+                <div class="cuenta">
+                    <div class="cuenta-negocio">${negocioActivo.nombre}</div>
+                    <div class="cuenta-usuario">
+                        ${usuario.nombre}
+                        <span class="badge ${rolActivo eq 'PROPIETARIO' ? 'badge-ok' : 'badge-neutro'}">
+                            ${rolActivo eq 'PROPIETARIO' ? 'Propietario' : 'Empleado'}
+                        </span>
+                    </div>
+                    <div class="cuenta-acciones">
+                        <a href="${ctx}/Negocios">Cambiar de negocio</a>
+                        <a href="${ctx}/CerrarSesion">Cerrar sesión</a>
+                    </div>
+                </div>
                 <div class="menu">
                     <h3>General</h3>
                     <a href="${ctx}/Panel">Panel</a>
@@ -45,6 +58,11 @@
                     <a href="${ctx}/ComprasPorProveedor">Compras por proveedor</a>
                     <a href="${ctx}/ProveedoresTop">Proveedores con más de 2</a>
                     <a href="${ctx}/SinProveedor">Productos sin proveedor</a>
+
+                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                        <h3>Negocio</h3>
+                        <a href="${ctx}/Empleados">Empleados</a>
+                    </c:if>
                 </div>
             </nav>
             <main class="principal">

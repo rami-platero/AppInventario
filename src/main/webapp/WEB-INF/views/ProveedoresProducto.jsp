@@ -48,12 +48,14 @@
                                 </td>
                                 <td class="chico">${pp.codigoProveedor}</td>
                                 <td>
-                                    <form action="${ctx}/EliminarProveedorProducto" method="post"
-                                          onsubmit="return confirm('¿Quitar a ${pp.proveedor.nombre} de este producto?');">
-                                        <input type="hidden" name="idProducto" value="${producto.idproducto}">
-                                        <input type="hidden" name="idProveedor" value="${pp.proveedor.idproveedor}">
-                                        <button class="btn btn-chico btn-peligro" type="submit">Quitar</button>
-                                    </form>
+                                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                                        <form action="${ctx}/EliminarProveedorProducto" method="post"
+                                              onsubmit="return confirm('¿Quitar a ${pp.proveedor.nombre} de este producto?');">
+                                            <input type="hidden" name="idProducto" value="${producto.idproducto}">
+                                            <input type="hidden" name="idProveedor" value="${pp.proveedor.idproveedor}">
+                                            <button class="btn btn-chico btn-peligro" type="submit">Quitar</button>
+                                        </form>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -63,44 +65,46 @@
         </c:choose>
     </div>
 
-    <div class="bloque">
-        <h2>Asignar un proveedor</h2>
-        <form class="campos" method="post" action="${ctx}/AgregarProveedorProducto">
-            <input type="hidden" name="idProducto" value="${producto.idproducto}">
+    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+        <div class="bloque">
+            <h2>Asignar un proveedor</h2>
+            <form class="campos" method="post" action="${ctx}/AgregarProveedorProducto">
+                <input type="hidden" name="idProducto" value="${producto.idproducto}">
 
-            <div class="campo-ancho">
-                <label for="idProveedor">Proveedor <span class="req" title="Campo obligatorio">*</span></label>
-                <select id="idProveedor" name="idProveedor" required>
-                    <c:forEach var="v" items="${proveedores}">
-                        <option value="${v.idproveedor}">${v.nombre}</option>
-                    </c:forEach>
-                </select>
-                <div class="ayuda">Si el proveedor ya está asignado, quitalo primero para cambiarle el precio.</div>
-            </div>
+                <div class="campo-ancho">
+                    <label for="idProveedor">Proveedor <span class="req" title="Campo obligatorio">*</span></label>
+                    <select id="idProveedor" name="idProveedor" required>
+                        <c:forEach var="v" items="${proveedores}">
+                            <option value="${v.idproveedor}">${v.nombre}</option>
+                        </c:forEach>
+                    </select>
+                    <div class="ayuda">Si el proveedor ya está asignado, quitalo primero para cambiarle el precio.</div>
+                </div>
 
-            <div>
-                <label for="precioCompra">Precio de compra <span class="req" title="Campo obligatorio">*</span></label>
-                <input type="number" id="precioCompra" name="precioCompra" value="0.00"
-                       min="0" step="0.01" required>
-            </div>
+                <div>
+                    <label for="precioCompra">Precio de compra <span class="req" title="Campo obligatorio">*</span></label>
+                    <input type="number" id="precioCompra" name="precioCompra" value="0.00"
+                           min="0" step="0.01" required>
+                </div>
 
-            <div>
-                <label for="diasEntrega">Días de entrega</label>
-                <input type="number" id="diasEntrega" name="diasEntrega" min="0" step="1">
-            </div>
+                <div>
+                    <label for="diasEntrega">Días de entrega</label>
+                    <input type="number" id="diasEntrega" name="diasEntrega" min="0" step="1">
+                </div>
 
-            <div class="campo-ancho">
-                <label for="codigoProveedor">Código del proveedor</label>
-                <input type="text" id="codigoProveedor" name="codigoProveedor" maxlength="30">
-                <div class="ayuda">Cómo identifica el proveedor a este producto en su catálogo.</div>
-            </div>
+                <div class="campo-ancho">
+                    <label for="codigoProveedor">Código del proveedor</label>
+                    <input type="text" id="codigoProveedor" name="codigoProveedor" maxlength="30">
+                    <div class="ayuda">Cómo identifica el proveedor a este producto en su catálogo.</div>
+                </div>
 
-            <div class="pie-form">
-                <button class="btn btn-primario" type="submit">Asignar</button>
-                <a class="btn" href="${ctx}/ListarProductos">Volver</a>
-            </div>
-        </form>
-    </div>
+                <div class="pie-form">
+                    <button class="btn btn-primario" type="submit">Asignar</button>
+                    <a class="btn" href="${ctx}/ListarProductos">Volver</a>
+                </div>
+            </form>
+        </div>
+    </c:if>
 </div>
 
 <%@include file="partes/pie.jsp"%>

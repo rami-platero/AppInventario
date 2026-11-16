@@ -9,7 +9,9 @@
         <h1>Categorías</h1>
         <p class="bajada">Agrupan los productos del catálogo.</p>
     </div>
-    <a class="btn btn-primario" href="${ctx}/AgregarCategoria">Agregar categoría</a>
+    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+        <a class="btn btn-primario" href="${ctx}/AgregarCategoria">Agregar categoría</a>
+    </c:if>
 </div>
 
 <div class="bloque">
@@ -45,13 +47,15 @@
                             </td>
                             <td>
                                 <div class="acciones">
-                                    <a class="btn btn-chico" href="${ctx}/EditarCategoria?id=${cat.idcategoria}">Editar</a>
                                     <a class="btn btn-chico" href="${ctx}/ListarProductos?categoria=${cat.idcategoria}">Ver productos</a>
-                                    <form action="${ctx}/EliminarCategoria" method="post"
-                                          onsubmit="return confirm('¿Eliminar la categoría ${cat.nombre}?');">
-                                        <input type="hidden" name="id" value="${cat.idcategoria}">
-                                        <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
-                                    </form>
+                                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                                        <a class="btn btn-chico" href="${ctx}/EditarCategoria?id=${cat.idcategoria}">Editar</a>
+                                        <form action="${ctx}/EliminarCategoria" method="post"
+                                              onsubmit="return confirm('¿Eliminar la categoría ${cat.nombre}?');">
+                                            <input type="hidden" name="id" value="${cat.idcategoria}">
+                                            <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>

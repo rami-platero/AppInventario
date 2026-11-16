@@ -10,7 +10,9 @@
         <h1>Productos</h1>
         <p class="bajada">Alta, edición y baja del catálogo.</p>
     </div>
-    <a class="btn btn-primario" href="${ctx}/AgregarProducto">Agregar producto</a>
+    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+        <a class="btn btn-primario" href="${ctx}/AgregarProducto">Agregar producto</a>
+    </c:if>
 </div>
 
 <form class="filtros" method="get" action="${ctx}/ListarProductos">
@@ -87,14 +89,18 @@
                             <td class="num"><fmt:formatNumber value="${p.precio}" type="currency" currencySymbol="$"/></td>
                             <td>
                                 <div class="acciones">
-                                    <a class="btn btn-chico" href="${ctx}/EditarProducto?id=${p.idproducto}">Editar</a>
+                                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                                        <a class="btn btn-chico" href="${ctx}/EditarProducto?id=${p.idproducto}">Editar</a>
+                                    </c:if>
                                     <a class="btn btn-chico" href="${ctx}/ProveedoresProducto?id=${p.idproducto}">Proveedores</a>
                                     <a class="btn btn-chico" href="${ctx}/RegistrarMovimiento?producto=${p.idproducto}">Mover</a>
-                                    <form action="${ctx}/EliminarProducto" method="post"
-                                          onsubmit="return confirm('¿Eliminar ${p.nombre}?');">
-                                        <input type="hidden" name="id" value="${p.idproducto}">
-                                        <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
-                                    </form>
+                                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                                        <form action="${ctx}/EliminarProducto" method="post"
+                                              onsubmit="return confirm('¿Eliminar ${p.nombre}?');">
+                                            <input type="hidden" name="id" value="${p.idproducto}">
+                                            <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>

@@ -9,7 +9,9 @@
         <h1>Proveedores</h1>
         <p class="bajada">A quién se le compra cada producto.</p>
     </div>
-    <a class="btn btn-primario" href="${ctx}/AgregarProveedor">Agregar proveedor</a>
+    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+        <a class="btn btn-primario" href="${ctx}/AgregarProveedor">Agregar proveedor</a>
+    </c:if>
 </div>
 
 <div class="bloque">
@@ -38,12 +40,14 @@
                             <td class="num">${fila[1]}</td>
                             <td>
                                 <div class="acciones">
-                                    <a class="btn btn-chico" href="${ctx}/EditarProveedor?id=${v.idproveedor}">Editar</a>
-                                    <form action="${ctx}/EliminarProveedor" method="post"
-                                          onsubmit="return confirm('¿Eliminar al proveedor ${v.nombre}?');">
-                                        <input type="hidden" name="id" value="${v.idproveedor}">
-                                        <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
-                                    </form>
+                                    <c:if test="${rolActivo eq 'PROPIETARIO'}">
+                                        <a class="btn btn-chico" href="${ctx}/EditarProveedor?id=${v.idproveedor}">Editar</a>
+                                        <form action="${ctx}/EliminarProveedor" method="post"
+                                              onsubmit="return confirm('¿Eliminar al proveedor ${v.nombre}?');">
+                                            <input type="hidden" name="id" value="${v.idproveedor}">
+                                            <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>
