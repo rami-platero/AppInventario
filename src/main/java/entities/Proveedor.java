@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -49,6 +51,9 @@ public class Proveedor implements Serializable {
     private Collection<ProductoProveedor> productoProveedorCollection;
     @OneToMany(mappedBy = "proveedorIdproveedor")
     private Collection<MovimientoStock> movimientoStockCollection;
+    @JoinColumn(name = "negocio_idnegocio", referencedColumnName = "idnegocio", nullable = false)
+    @ManyToOne(optional = false)
+    private Negocio negocioIdnegocio;
 
     public Proveedor() {
     }
@@ -110,6 +115,14 @@ public class Proveedor implements Serializable {
 
     public void setMovimientoStockCollection(Collection<MovimientoStock> movimientoStockCollection) {
         this.movimientoStockCollection = movimientoStockCollection;
+    }
+
+    public Negocio getNegocioIdnegocio() {
+        return negocioIdnegocio;
+    }
+
+    public void setNegocioIdnegocio(Negocio negocioIdnegocio) {
+        this.negocioIdnegocio = negocioIdnegocio;
     }
 
     @Override

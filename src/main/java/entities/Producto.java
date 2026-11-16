@@ -85,6 +85,9 @@ public class Producto implements Serializable {
     @JoinColumn(name = "categoria_idcategoria", referencedColumnName = "idcategoria", nullable = false)
     @ManyToOne(optional = false)
     private Categoria categoriaIdcategoria;
+    @JoinColumn(name = "negocio_idnegocio", referencedColumnName = "idnegocio", nullable = false)
+    @ManyToOne(optional = false)
+    private Negocio negocioIdnegocio;
 
     public Producto() {
     }
@@ -209,6 +212,14 @@ public class Producto implements Serializable {
 
     public void setCategoriaIdcategoria(Categoria categoriaIdcategoria) {
         this.categoriaIdcategoria = categoriaIdcategoria;
+    }
+
+    public Negocio getNegocioIdnegocio() {
+        return negocioIdnegocio;
+    }
+
+    public void setNegocioIdnegocio(Negocio negocioIdnegocio) {
+        this.negocioIdnegocio = negocioIdnegocio;
     }
 
     @Override

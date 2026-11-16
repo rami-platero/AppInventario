@@ -68,6 +68,9 @@ public class MovimientoStock implements Serializable {
     @JoinColumn(name = "proveedor_idproveedor", referencedColumnName = "idproveedor")
     @ManyToOne
     private Proveedor proveedorIdproveedor;
+    @JoinColumn(name = "negocio_idnegocio", referencedColumnName = "idnegocio", nullable = false)
+    @ManyToOne(optional = false)
+    private Negocio negocioIdnegocio;
 
     public MovimientoStock() {
     }
@@ -154,6 +157,14 @@ public class MovimientoStock implements Serializable {
 
     public void setProveedorIdproveedor(Proveedor proveedorIdproveedor) {
         this.proveedorIdproveedor = proveedorIdproveedor;
+    }
+
+    public Negocio getNegocioIdnegocio() {
+        return negocioIdnegocio;
+    }
+
+    public void setNegocioIdnegocio(Negocio negocioIdnegocio) {
+        this.negocioIdnegocio = negocioIdnegocio;
     }
 
     @Override
