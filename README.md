@@ -161,7 +161,9 @@ mvn clean package
 asadmin deploy --force=true target/AppInventario-1.0-SNAPSHOT.war
 ```
 
-La aplicación queda en `http://localhost:8080/AppInventario-1.0-SNAPSHOT/`.
+La aplicación queda en `http://localhost:8080/AppInventario/` cuando se despliega desde
+NetBeans, o en `http://localhost:8080/AppInventario-1.0-SNAPSHOT/` si se despliega el `.war`
+con `asadmin`, que toma el nombre del archivo como contexto.
 
 ## Modelo de datos
 
